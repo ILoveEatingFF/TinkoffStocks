@@ -31,12 +31,18 @@ class StockViewController: UIViewController {
     private let priceChange = UILabel()
 
     private let logo = UIImageView()
+
+    private let typeButton = UIButton(type: .system)
     
     private let activityIndicator = UIActivityIndicatorView()
     
     private let companyPickerView = UIPickerView()
     
     private lazy var companies: [String: String] = [:]
+
+    private var currentCompanyType: CompanyType = .gainers
+
+    private var currentPickerViewRow = 0
 
     init(output: StockViewOutput) {
         self.output = output
@@ -58,7 +64,7 @@ class StockViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        output.requestCompanies()
+        output.requestCompanies(type: .gainers)
     }
 
     
@@ -69,6 +75,7 @@ class StockViewController: UIViewController {
         setupSymbol()
         setupPrice()
         setupPriceChange()
+        setupCompaniesType()
         setupActivityIndicator()
         setupPicker()
     }
@@ -76,6 +83,7 @@ class StockViewController: UIViewController {
     private func setupConstraints() {
         [titleLabel,
          generalStack,
+         typeButton,
          companyPickerView,
          logo,
          activityIndicator
@@ -92,7 +100,12 @@ class StockViewController: UIViewController {
 
             logo.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             logo.topAnchor.constraint(equalTo: generalStack.bottomAnchor, constant: 40.0),
-            logo.bottomAnchor.constraint(lessThanOrEqualTo: companyPickerView.topAnchor, constant: 40.0),
+            logo.bottomAnchor.constraint(lessThanOrEqualTo: typeButton.topAnchor, constant: -10.0),
+
+            typeButton.bottomAnchor.constraint(equalTo: companyPickerView.topAnchor, constant: -20.0),
+            typeButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            typeButton.widthAnchor.constraint(equalToConstant: 100.0),
+            typeButton.heightAnchor.constraint(equalToConstant: 60.0),
 
             activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
@@ -192,6 +205,28 @@ class StockViewController: UIViewController {
         buildRightLabel(label: priceChange)
     }
 
+    private func setupCompaniesType() {
+        view.addSubview(typeButton)
+
+        typeButton.setTitle("Gainers", for: .normal)
+        typeButton.addTarget(self, action: #selector(onTapType), for: .touchUpInside)
+    }
+
+    @objc
+    private func onTapType() {
+        let alert = UIAlertController(title: "Choose Type", message: nil, preferredStyle: .actionSheet)
+        let gainers = makeAlertAction(type: .gainers)
+        let losers = makeAlertAction(type: .losers)
+        let mostActive = makeAlertAction(type: .mostActive)
+        let iexPercent = makeAlertAction(type: .iexPercent)
+
+        [gainers, losers, mostActive, iexPercent].forEach { action in
+            alert.addAction(action)
+        }
+
+        present(alert, animated: false)
+    }
+
     private func setupActivityIndicator() {
         view.addSubview(activityIndicator)
 
@@ -275,5 +310,28 @@ private extension StockViewController {
     func buildRightLabel(label: UILabel) {
         symbol.text = "-"
         symbol.textAlignment = .right
+    }
+
+    private func makeAlertAction(type: CompanyType) -> UIAlertAction {
+        var title = ""
+        switch type {
+        case .gainers:
+            title = "Gainers"
+        case .losers:
+            title = "Losers"
+        case .mostActive:
+            title = "Most active"
+        case .iexPercent:
+            title = "IEX Percent"
+
+        }
+        let alertAction = UIAlertAction(title: title, style: .default) { action in
+            if type != self.currentCompanyType {
+                self.currentCompanyType = type
+                self.typeButton.setTitle(title, for: .normal)
+                self.output.requestCompanies(type: type)
+            }
+        }
+        return alertAction
     }
 }

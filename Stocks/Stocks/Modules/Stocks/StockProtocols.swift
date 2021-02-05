@@ -12,7 +12,7 @@ protocol StockViewInput: class {
 }
 
 protocol StockViewOutput: class {
-    func requestCompanies()
+    func requestCompanies(type: CompanyType)
     func requestQuoteUpdate(with symbol: String)
     func requestLogo(with symbol: String)
 }

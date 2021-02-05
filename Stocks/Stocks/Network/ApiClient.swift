@@ -22,8 +22,8 @@ final class ApiClient {
         return jsonDecoder
     }()
 
-    func requestCompanies<T: Decodable>(completion: @escaping (Result<T, Error>) -> Void) {
-        guard let urlCompanies = makeURLForCompanies() else {
+    func requestCompanies<T: Decodable>(type: CompanyType, completion: @escaping (Result<T, Error>) -> Void) {
+        guard let urlCompanies = makeURLForCompanies(type: type) else {
             completion(.failure(InternalError.unknownSymbol))
             return
         }
@@ -86,9 +86,9 @@ final class ApiClient {
         dataTask.resume()
     }
 
-    private func makeURLForCompanies() -> URL? {
+    private func makeURLForCompanies(type: CompanyType) -> URL? {
         var result = baseComponents
-        result.path = "/stable/stock/market/list/gainers"
+        result.path = "/stable/stock/market/list/\(type.rawValue)"
         return result.url
     }
 

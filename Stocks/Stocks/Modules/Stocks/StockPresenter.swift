@@ -12,8 +12,8 @@ class StockPresenter {
 
 extension StockPresenter: StockViewOutput {
 
-    func requestCompanies() {
-        apiClient.requestCompanies { [weak self] (result: Result<[Company], Error>) in
+    func requestCompanies(type: CompanyType) {
+        apiClient.requestCompanies(type: type) { [weak self] (result: Result<[Company], Error>) in
             switch result {
             case .failure(let error):
                 self?.view?.showAlert(title: "Error", message: error.localizedDescription)

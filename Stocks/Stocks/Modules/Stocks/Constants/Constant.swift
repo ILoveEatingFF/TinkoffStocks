@@ -10,3 +10,6 @@ enum Color {
     case black
 }
 
+enum CompanyType: String {
+    case gainers, losers, mostActive, iexPercent
+}
