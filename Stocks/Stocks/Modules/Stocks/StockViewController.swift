@@ -246,6 +246,7 @@ extension StockViewController: StockViewInput {
     func updateCompanies(with companies: [String: String]) {
         activityIndicator.stopAnimating()
         self.companies = companies
+        companyPickerView.selectRow(0, inComponent: 0, animated: false)
         companyPickerView.reloadAllComponents()
         requestQuoteUpdate()
     }
@@ -296,7 +297,10 @@ extension StockViewController: UIPickerViewDelegate {
     }
 
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        requestQuoteUpdate()
+        if row != currentPickerViewRow {
+            currentPickerViewRow = row
+            requestQuoteUpdate()
+        }
     }
 }
 
@@ -327,6 +331,7 @@ private extension StockViewController {
         }
         let alertAction = UIAlertAction(title: title, style: .default) { action in
             if type != self.currentCompanyType {
+                self.currentPickerViewRow = 0
                 self.currentCompanyType = type
                 self.typeButton.setTitle(title, for: .normal)
                 self.output.requestCompanies(type: type)
